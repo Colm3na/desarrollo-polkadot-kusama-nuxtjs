@@ -1,32 +1,62 @@
 <template>
-  <div class="container">
+  <div class="container text-center">
     <div>
       <Logo />
       <h1 class="title">desarrollo-polkadot-kusama-nuxtjs</h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
+      <table class="table my-4">
+        <thead>
+          <tr>
+            <th>chain</th>
+            <th>Node name</th>
+            <th>Node version</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              {{ chain }}
+            </td>
+            <td>
+              {{ nodeName }}
+            </td>
+            <td>
+              {{ nodeVersion }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
 
 <script>
-export default {}
+import { ApiPromise, WsProvider } from '@polkadot/api'
+export default {
+  data() {
+    return {
+      chain: null,
+      nodeName: null,
+      nodeVersion: null,
+    }
+  },
+  async created() {
+    // Initialise the provider to connect to the local node
+    const provider = new WsProvider('wss://rpc.polkadot.io')
+
+    // Create the API and wait until ready
+    const api = await ApiPromise.create({ provider })
+
+    // Retrieve the chain & node information information via rpc calls
+    const [chain, nodeName, nodeVersion] = await Promise.all([
+      api.rpc.system.chain(),
+      api.rpc.system.name(),
+      api.rpc.system.version(),
+    ])
+    this.chain = chain
+    this.nodeName = nodeName
+    this.nodeVersion = nodeVersion
+  },
+}
 </script>
 
 <style>
